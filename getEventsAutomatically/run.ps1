@@ -53,7 +53,7 @@ $table = Get-AzStorageTable -Name $tableName -Context $StorageContext
 $cloudTable = $table.CloudTable
 $row = Get-AzTableRow `
     -table $cloudTable `
-    -customFilter "(PartitionKey eq 'MPBI') and (RowKey eq 'lastTimeStamp')"
+    -customFilter "(PartitionKey eq 'MPBI-Automatic') and (RowKey eq 'lastTimeStamp')"
 
 if (!$row) {
     $startTime = $(get-date).AddDays(-1).ToString("yyyy/MM/dd")
@@ -133,7 +133,7 @@ foreach ($workload in $workloadOptions) {
     )
     
     $entity = New-Object -TypeName "Microsoft.Azure.Cosmos.Table.DynamicTableEntity"
-    $entity.PartitionKey = "MPBI"
+    $entity.PartitionKey = "MPBI-Automatic"
     $entity.RowKey = "lastTimeStamp"
     $entity.Properties.Add("Happened", $lastTimeStamp)
     $table.CloudTable.Execute([Microsoft.Azure.Cosmos.Table.TableOperation]::InsertOrReplace($entity))

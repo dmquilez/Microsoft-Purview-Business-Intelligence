@@ -1,5 +1,4 @@
 targetScope = 'resourceGroup'
-
 var rg = resourceGroup()
 
 var subscription = az.subscription()
