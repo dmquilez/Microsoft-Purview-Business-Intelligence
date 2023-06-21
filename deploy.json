@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.17.1.54307",
-      "templateHash": "18186050561259692191"
+      "version": "0.18.4.5664",
+      "templateHash": "5422481235771010883"
     }
   },
   "variables": {
@@ -13,7 +13,7 @@
     "subscription": "[subscription()]",
     "baseName": "[uniqueString(resourceGroup().id)]",
     "location": "[variables('rg').location]",
-    "packageURL": "https://github.com/dmquilez/MPBI/releases/latest/download/release.zip",
+    "packageURL": "https://github.com/dmquilez/Microsoft-Purview-Business-Intelligence/releases/latest/download/release.zip",
     "keyVaultName": "[format('kv-{0}', variables('baseName'))]"
   },
   "resources": [
@@ -135,7 +135,7 @@
         "AzureWebJobsStorage": "[format('DefaultEndpointsProtocol=https;AccountName={0}sa;EndpointSuffix={1};AccountKey={2}', variables('baseName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', format('{0}sa', toLower(variables('baseName')))), '2021-06-01').keys[0].value)]",
         "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[format('DefaultEndpointsProtocol=https;AccountName={0}sa;EndpointSuffix={1};AccountKey={2}', variables('baseName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', format('{0}sa', toLower(variables('baseName')))), '2021-06-01').keys[0].value)]",
         "FUNCTIONS_WORKER_RUNTIME": "powershell",
-        "FUNCTIONS_WORKER_RUNTIME_VERSION": "5",
+        "FUNCTIONS_WORKER_RUNTIME_VERSION": "7.2",
         "WEBSITE_CONTENTSHARE": "[toLower(format('{0}-app', variables('baseName')))]",
         "SUBSCRIPTION_ID": "[variables('subscription').subscriptionId]",
         "Project": "microsoft-purview-business-intelligence",
