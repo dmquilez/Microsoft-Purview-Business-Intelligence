@@ -24,19 +24,19 @@ catch {
 }
 
 try {
-	$webapps = @(Get-AzWebApp)
+	$functionapps = @(Get-AzFunctionApp)
 	$appSettings = @{}
 
 	Write-Host "[!] Select the Function Web App to use for CBA:" -f Blue
-	for ($i = 0; $i -lt $webapps.Count; $i++) {
-		Write-Host "[$i]: $($webapps[$i].Name)"
+	for ($i = 0; $i -lt $functionapps.Count; $i++) {
+		Write-Host "[$i]: $($functionapps[$i].Name)"
 	}
-	$functionWebAppIndex = Read-Host "Select the Function App to use for CBA (0-$(($webapps.Count - 1))):"
-	if ($functionWebAppIndex -lt 0 -or $functionWebAppIndex -ge $webapps.Count) {
+	$functionWebAppIndex = Read-Host "Select the Function App to use for CBA (0-$(($functionapps.Count - 1))):"
+	if ($functionWebAppIndex -lt 0 -or $functionWebAppIndex -ge $functionapps.Count) {
 		Write-Host "[X] Invalid Function Web App index selected. Exiting..." -f Red
 		Exit
 	}
-	$webapp = Get-AzWebApp -ResourceGroupName $($webapps[$functionWebAppIndex]).ResourceGroup -Name $($webapps[$functionWebAppIndex]).Name
+	$webapp = Get-AzWebApp -ResourceGroupName $($functionapps[$functionWebAppIndex]).ResourceGroup -Name $($functionapps[$functionWebAppIndex]).Name
 	ForEach ($item in $webapp.SiteConfig.AppSettings) {
 		$appSettings.Add($item.Name, $item.Value)
 	}
