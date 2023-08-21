@@ -31,13 +31,13 @@ try {
 	for ($i = 0; $i -lt $functionapps.Count; $i++) {
 		Write-Host "[$i]: $($functionapps[$i].Name)"
 	}
-	$functionWebAppIndex = Read-Host "Select the Function App to use for CBA (0-$(($functionapps.Count - 1))):"
-	if ($functionWebAppIndex -lt 0 -or $functionWebAppIndex -ge $functionapps.Count) {
+	$functionAppIndex = Read-Host "Select the Function App to use for CBA (0-$(($functionapps.Count - 1))):"
+	if ($functionAppIndex -lt 0 -or $functionAppIndex -ge $functionapps.Count) {
 		Write-Host "[X] Invalid Function Web App index selected. Exiting..." -f Red
 		Exit
 	}
-	$webapp = Get-AzWebApp -ResourceGroupName $($functionapps[$functionWebAppIndex]).ResourceGroup -Name $($functionapps[$functionWebAppIndex]).Name
-	ForEach ($item in $webapp.SiteConfig.AppSettings) {
+	$functionApp = Get-AzFunctionApp -ResourceGroupName $($functionapps[$functionAppIndex]).ResourceGroup -Name $($functionapps[$functionAppIndex]).Name
+	ForEach ($item in $functionApp.SiteConfig.AppSettings) {
 		$appSettings.Add($item.Name, $item.Value)
 	}
 }
@@ -86,7 +86,7 @@ catch {
 }
 
 try {
-	Write-Host "[!] Getting onmicrosoft domain and adding it to App Settings of the Azure function ($($webapp.Name))..." -f Blue
+	Write-Host "[!] Getting onmicrosoft domain and adding it to App Settings of the Azure function ($($functionApp.Name))..." -f Blue
 	$tenant = Get-AzureADTenantDetail
 	$onmicrosoftDomain = $tenant.VerifiedDomains | Where-Object { $_.Name -like '*.onmicrosoft.com' -and (-not ($_.Name -like '*.mail.onmicrosoft.com')) }
 	$appSettings['ONMICROSOFT_DOMAIN'] = $onmicrosoftDomain.Name
@@ -102,8 +102,8 @@ try {
 	Write-Host "[!] Creating Azure AD application ($appname)..." -f Blue
 	$appRegistration = New-AzureADApplication -DisplayName $appName -ReplyUrls $replyUrl
 	$appSettings['ADAppId'] = $appRegistration.AppId
-	Write-Host "[!] Updating Function Web App settings with Azure AD App Id ($($webapp.Name))..." -f Blue
-	Set-AzWebApp -ResourceGroupName $webapp.ResourceGroup -Name $webapp.Name -AppSettings $appSettings
+	Write-Host "[!] Updating Function App settings with Azure AD App Id ($($functionApp.Name))..." -f Blue
+	Set-AzWebApp -ResourceGroupName $functionApp.ResourceGroup -Name $functionApp.Name -AppSettings $appSettings
 }
 catch {
 	Write-Host $_.Exception.Message -f Red
@@ -168,4 +168,4 @@ catch {
 }
 	 
 Write-Host "[OK] Execution completed!" -f Green
-Write-Host "[!] Please, grant admin consent for Azure AD Application API permissions at: https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/$($appRegistration.AppId)/isMSAApp~/false" -f Yellow
+Write-Host "[!] Please, grant admin consent for Azure AD Application API permissions at: https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/CallAnAPI/appId/$($appRegistration.AppId)/isMSAApp~/false" -f Yellow
