@@ -24,20 +24,20 @@ catch {
 }
 
 try {
-	$functionapps = @(Get-AzFunctionApp)
+	$webapps = @(Get-AzWebApp)
 	$appSettings = @{}
 
 	Write-Host "[!] Select the Function Web App to use for CBA:" -f Blue
-	for ($i = 0; $i -lt $functionapps.Count; $i++) {
-		Write-Host "[$i]: $($functionapps[$i].Name)"
+	for ($i = 0; $i -lt $webapps.Count; $i++) {
+		Write-Host "[$i]: $($webapps[$i].Name)"
 	}
-	$functionAppIndex = Read-Host "Select the Function App to use for CBA (0-$(($functionapps.Count - 1))):"
-	if ($functionAppIndex -lt 0 -or $functionAppIndex -ge $functionapps.Count) {
+	$functionWebAppIndex = Read-Host "Select the Function App to use for CBA (0-$(($webapps.Count - 1))):"
+	if ($functionWebAppIndex -lt 0 -or $functionWebAppIndex -ge $webapps.Count) {
 		Write-Host "[X] Invalid Function Web App index selected. Exiting..." -f Red
 		Exit
 	}
-	$functionApp = Get-AzFunctionApp -ResourceGroupName $($functionapps[$functionAppIndex]).ResourceGroup -Name $($functionapps[$functionAppIndex]).Name
-	ForEach ($item in $functionApp.SiteConfig.AppSettings) {
+	$webapp = Get-AzWebApp -ResourceGroupName $($webapps[$functionWebAppIndex]).ResourceGroup -Name $($webapps[$functionWebAppIndex]).Name
+	ForEach ($item in $webapp.SiteConfig.AppSettings) {
 		$appSettings.Add($item.Name, $item.Value)
 	}
 }
@@ -86,7 +86,7 @@ catch {
 }
 
 try {
-	Write-Host "[!] Getting onmicrosoft domain and adding it to App Settings of the Azure function ($($functionApp.Name))..." -f Blue
+	Write-Host "[!] Getting onmicrosoft domain and adding it to App Settings of the Azure function ($($webapp.Name))..." -f Blue
 	$tenant = Get-AzureADTenantDetail
 	$onmicrosoftDomain = $tenant.VerifiedDomains | Where-Object { $_.Name -like '*.onmicrosoft.com' -and (-not ($_.Name -like '*.mail.onmicrosoft.com')) }
 	$appSettings['ONMICROSOFT_DOMAIN'] = $onmicrosoftDomain.Name
@@ -102,8 +102,10 @@ try {
 	Write-Host "[!] Creating Azure AD application ($appname)..." -f Blue
 	$appRegistration = New-AzureADApplication -DisplayName $appName -ReplyUrls $replyUrl
 	$appSettings['ADAppId'] = $appRegistration.AppId
-	Write-Host "[!] Updating Function App settings with Azure AD App Id ($($functionApp.Name))..." -f Blue
-	Set-AzWebApp -ResourceGroupName $functionApp.ResourceGroup -Name $functionApp.Name -AppSettings $appSettings
+	Write-Host "[!] Updating Function Web App settings with Azure AD App Id ($($webapp.Name))..." -f Blue
+	Set-AzWebApp -ResourceGroupName $webapp.ResourceGroup -Name $webapp.Name -AppSettings $appSettings
+	Write-Host "[!] Restarting Function Web App ($($webapp.Name))..." -f Blue
+	Restart-AzWebApp -ResourceGroupName $webapp.ResourceGroup -Name $webapp.Name
 }
 catch {
 	Write-Host $_.Exception.Message -f Red
